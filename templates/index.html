@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel Description Extractor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f6fa;
+      color: #222;
+      padding: 40px;
+    }
+    h1 { color: #003366; }
+    .container {
+      background: white;
+      display: inline-block;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, button {
+      margin: 10px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Excel Description Extractor</h1>
+    <p>Upload Excel or CSV files that contain a <b>"Description"</b> column.<br>
+       The system will extract <b>Category</b>, <b>Source</b>, <b>Client ID</b>, and <b>Desk Ticket</b> into separate columns.</p>
+
+    <!-- ✅ Correct form field name -->
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="files" id="fileInput" multiple required>
+      <br>
+      <button type="submit">Upload & Process</button>
+    </form>
+
+    <button id="downloadBtn">Download Processed ZIP</button>
+    <button id="resetBtn">Reset</button>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const files = document.getElementById("fileInput").files;
+      if (!files.length) {
+        message.textContent = "Please select at least one file.";
+        return;
+      }
+
+      const formData = new FormData();
+      for (let file of files) {
+        formData.append("files", file);  // ✅ matches Flask's 'files'
+      }
+
+      const res = await fetch("/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      message.textContent = data.message;
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", async () => {
+      const res = await fetch("/reset", { method: "POST" });
+      const data = await res.json();
+      message.textContent = data.message;
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      window.location.href = "/download";
+    });
+  </script>
+</body>
+</html>
+
+
+
